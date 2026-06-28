@@ -1,0 +1,26 @@
+Lab #1 Refresher Su26
+Muhammad Yusuf Rehman
+
+
+Numbers Divisible by 5
+Values: 5 10 15 25 30 35 50 55 60 70 
+Count                                 10
+Sum                                  355
+Average                            35.50
+Median                             32.50
+
+Numbers Divisible by 7
+Values: 7 14 21 28 42 49 
+Count                                  6
+Sum                                  161
+Average                            26.83
+Median                             24.50
+
+Other Numbers
+Values: 22 43 71 
+Count                                  3
+Sum                                  136
+Average                            45.33
+Median                             43.00
+
+Skipped Values                         0
