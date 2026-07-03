@@ -8,8 +8,8 @@
 #include <limits>
 using namespace std;
 
-const string INPUT_FILE_NAME = "input.txt";
-const string OUTPUT_FILE_NAME = "output.txt";
+const string INPUT_FILE_NAME = "in_numbers.txt";
+const string OUTPUT_FILE_NAME = "out_numbers.txt";
 
 const int MAX_VALUES = 1000;
 const int DIVISIBLE_BY_FIVE = 5;
@@ -59,7 +59,6 @@ double calculateMedian(const int values[], int count);
 
 void copyArray(const int source[], int destination[], int count);
 void sortDescending(int values[], int count);
-
 void printSortedValues(const string &title, const int values[], int count);
 
 void writeOutputFile(const int divisibleByFive[], int countFive,
@@ -77,9 +76,9 @@ void writeStatsTable(ofstream &outputFile, const int values[], int count);
 
 int main()
 {
-    int divisibleByFive[MAX_VALUES];
-    int divisibleBySeven[MAX_VALUES];
-    int otherNumbers[MAX_VALUES];
+    int divisibleByFive[MAX_VALUES] = {0};
+    int divisibleBySeven[MAX_VALUES] = {0};
+    int otherNumbers[MAX_VALUES] = {0};
 
     int countFive = 0;
     int countSeven = 0;
@@ -131,6 +130,11 @@ int main()
     return 0;
 }
 
+/*
+Description: This function prints the title and student name.
+Pre-condition: The program has started.
+Post-condition: The header is shown on the screen.
+*/
 void displayHeader()
 {
     cout << "Lab #1 Refresher Su26" << endl;
@@ -138,6 +142,11 @@ void displayHeader()
     cout << endl;
 }
 
+/*
+Description: This function shows the menu choices.
+Pre-condition: The program is ready for the user to pick an option.
+Post-condition: The menu is printed on the screen.
+*/
 void displayMenu()
 {
     cout << endl;
@@ -148,6 +157,11 @@ void displayMenu()
     cout << "Enter your choice: ";
 }
 
+/*
+Description: This function gets the menu choice from the user.
+Pre-condition: The user must type something into the keyboard.
+Post-condition: A valid number input is returned.
+*/
 int getMenuChoice()
 {
     int choice = 0;
@@ -163,6 +177,11 @@ int getMenuChoice()
     return choice;
 }
 
+/*
+Description: This function clears bad keyboard input.
+Pre-condition: The user typed input that was not valid.
+Post-condition: The input stream is fixed so the user can try again.
+*/
 void clearFailedInput(const string &message)
 {
     cout << message;
@@ -170,6 +189,11 @@ void clearFailedInput(const string &message)
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
+/*
+Description: This function reads numbers from the input file and puts them into arrays.
+Pre-condition: The arrays and counts already exist.
+Post-condition: Numbers are stored in the correct arrays.
+*/
 void getData(int divisibleByFive[], int &countFive,
              int divisibleBySeven[], int &countSeven,
              int otherNumbers[], int &countOther,
@@ -207,6 +231,11 @@ void getData(int divisibleByFive[], int &countFive,
     }
 }
 
+/*
+Description: This function stores one number in an array if there is space.
+Pre-condition: The array and count already exist.
+Post-condition: The number is stored or counted as skipped.
+*/
 void storeNumber(int values[], int &count, int number, int &skippedCount)
 {
     if (count < MAX_VALUES)
@@ -220,6 +249,11 @@ void storeNumber(int values[], int &count, int number, int &skippedCount)
     }
 }
 
+/*
+Description: This function prints all values and statistics.
+Pre-condition: The arrays already have their numbers.
+Post-condition: The values and statistics are printed on the screen.
+*/
 void processStatsOption(const int divisibleByFive[], int countFive,
                         const int divisibleBySeven[], int countSeven,
                         const int otherNumbers[], int countOther)
@@ -231,6 +265,11 @@ void processStatsOption(const int divisibleByFive[], int countFive,
     printArrayReport("Other Numbers", otherNumbers, countOther);
 }
 
+/*
+Description: This function prints all values sorted from biggest to smallest.
+Pre-condition: The arrays already have their numbers.
+Post-condition: The sorted values are printed on the screen.
+*/
 void processSortedOption(const int divisibleByFive[], int countFive,
                          const int divisibleBySeven[], int countSeven,
                          const int otherNumbers[], int countOther)
@@ -240,6 +279,11 @@ void processSortedOption(const int divisibleByFive[], int countFive,
     printSortedValues("Other Numbers", otherNumbers, countOther);
 }
 
+/*
+Description: This function writes the output file and ends the menu loop.
+Pre-condition: The arrays already have their numbers.
+Post-condition: Results are saved to the output file and the program is ready to quit.
+*/
 void processQuitOption(const int divisibleByFive[], int countFive,
                        const int divisibleBySeven[], int countSeven,
                        const int otherNumbers[], int countOther,
@@ -258,6 +302,11 @@ void processQuitOption(const int divisibleByFive[], int countFive,
     done = true;
 }
 
+/*
+Description: This function prints one report section for one array.
+Pre-condition: The array and its count already exist.
+Post-condition: The values and statistics for that array are printed.
+*/
 void printArrayReport(const string &title, const int values[], int count)
 {
     cout << endl;
@@ -275,6 +324,11 @@ void printArrayReport(const string &title, const int values[], int count)
     }
 }
 
+/*
+Description: This function prints the numbers in an array.
+Pre-condition: The array and its count already exist.
+Post-condition: The numbers are printed on the screen.
+*/
 void printValues(const int values[], int count)
 {
     int index = 0;
@@ -295,6 +349,11 @@ void printValues(const int values[], int count)
     }
 }
 
+/*
+Description: This function prints count, sum, average, and median.
+Pre-condition: The array has at least one number.
+Post-condition: The statistics are printed on the screen.
+*/
 void printStatsTable(const int values[], int count)
 {
     int total = 0;
@@ -315,6 +374,11 @@ void printStatsTable(const int values[], int count)
          << right << setw(VALUE_WIDTH) << median << endl;
 }
 
+/*
+Description: This function adds all numbers in an array.
+Pre-condition: The array and its count already exist.
+Post-condition: The total is returned.
+*/
 int calculateTotal(const int values[], int count)
 {
     int index = 0;
@@ -329,6 +393,11 @@ int calculateTotal(const int values[], int count)
     return total;
 }
 
+/*
+Description: This function finds the average of the numbers.
+Pre-condition: The array has at least one number.
+Post-condition: The average is returned.
+*/
 double calculateAverage(const int values[], int count)
 {
     int total = 0;
@@ -340,9 +409,14 @@ double calculateAverage(const int values[], int count)
     return average;
 }
 
+/*
+Description: This function finds the median of the numbers.
+Pre-condition: The array has at least one number.
+Post-condition: The median is returned.
+*/
 double calculateMedian(const int values[], int count)
 {
-    int sortedValues[MAX_VALUES];
+    int sortedValues[MAX_VALUES] = {0};
     int middle = 0;
     double median = 0.0;
 
@@ -364,6 +438,11 @@ double calculateMedian(const int values[], int count)
     return median;
 }
 
+/*
+Description: This function copies one array into another array.
+Pre-condition: The source and destination arrays already exist.
+Post-condition: The destination array has the same values as the source array.
+*/
 void copyArray(const int source[], int destination[], int count)
 {
     int index = 0;
@@ -375,6 +454,11 @@ void copyArray(const int source[], int destination[], int count)
     }
 }
 
+/*
+Description: This function sorts an array from biggest to smallest.
+Pre-condition: The array and its count already exist.
+Post-condition: The array is sorted in descending order.
+*/
 void sortDescending(int values[], int count)
 {
     int pass = 0;
@@ -401,9 +485,14 @@ void sortDescending(int values[], int count)
     }
 }
 
+/*
+Description: This function prints a sorted copy of an array.
+Pre-condition: The array and its count already exist.
+Post-condition: The sorted values are printed without changing the original array.
+*/
 void printSortedValues(const string &title, const int values[], int count)
 {
-    int sortedValues[MAX_VALUES];
+    int sortedValues[MAX_VALUES] = {0};
 
     copyArray(values, sortedValues, count);
     sortDescending(sortedValues, count);
@@ -414,6 +503,11 @@ void printSortedValues(const string &title, const int values[], int count)
     printValues(sortedValues, count);
 }
 
+/*
+Description: This function writes all results to the output file.
+Pre-condition: The arrays and counts already exist.
+Post-condition: The output file has the final report.
+*/
 void writeOutputFile(const int divisibleByFive[], int countFive,
                      const int divisibleBySeven[], int countSeven,
                      const int otherNumbers[], int countOther,
@@ -452,6 +546,11 @@ void writeOutputFile(const int divisibleByFive[], int countFive,
     }
 }
 
+/*
+Description: This function writes one report section to the output file.
+Pre-condition: The output file is open and the array exists.
+Post-condition: One section is written to the output file.
+*/
 void writeArrayReport(ofstream &outputFile,
                       const string &title,
                       const int values[],
@@ -472,6 +571,11 @@ void writeArrayReport(ofstream &outputFile,
     }
 }
 
+/*
+Description: This function writes the numbers in an array to the output file.
+Pre-condition: The output file is open and the array exists.
+Post-condition: The numbers are written to the output file.
+*/
 void writeValues(ofstream &outputFile, const int values[], int count)
 {
     int index = 0;
@@ -492,6 +596,11 @@ void writeValues(ofstream &outputFile, const int values[], int count)
     }
 }
 
+/*
+Description: This function writes count, sum, average, and median to the output file.
+Pre-condition: The output file is open and the array has at least one number.
+Post-condition: The statistics are written to the output file.
+*/
 void writeStatsTable(ofstream &outputFile, const int values[], int count)
 {
     int total = 0;
@@ -514,7 +623,7 @@ void writeStatsTable(ofstream &outputFile, const int values[], int count)
 
 /*
 
-input.txt:
+in_numbers.txt:
 5 7 10 14 15 21 22 25 28 30 35 42 43 49 50 55 60 70 71
 
 Sample Test Run:
@@ -569,10 +678,10 @@ Menu
 2. Print values sorted in descending order
 3. Quit and write results to output file
 Enter your choice: 3
-Program results were written to output.txt.
+Program results were written to out_numbers.txt.
 Program will now quit.
 
-output.txt:
+out_numbers.txt:
 Lab #1 Refresher Su26
 Muhammad Yusuf Rehman
 
@@ -599,5 +708,4 @@ Average                            45.33
 Median                             43.00
 
 Skipped Values                         0
-
 */
