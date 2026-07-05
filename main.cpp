@@ -1,101 +1,86 @@
-// Muhammad Yusuf Rehman
 // Lab #1 Refresher Su26
+// Muhammad Yusuf Rehman
 
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-#include <string>
 #include <limits>
+
 using namespace std;
 
-const string INPUT_FILE_NAME = "in_numbers.txt";
-const string OUTPUT_FILE_NAME = "out_numbers.txt";
-
+const char INPUT_FILE_NAME[] = "in_numbers.txt";
+const char OUTPUT_FILE_NAME[] = "out_numbers.txt";
+const char DIVISIBLE_BY_FIVE_LABEL[] = "Numbers Divisible by 5";
+const char DIVISIBLE_BY_SEVEN_LABEL[] = "Numbers Divisible by 7";
+const char OTHER_NUMBERS_LABEL[] = "Other Numbers";
+const char INVALID_CHOICE_MESSAGE[] = "Invalid menu choice.";
+const char MENU_TEXT[] = "\n\nMenu\n"
+                         "1. Print values in each array with average, median, and sum\n"
+                         "2. Print values in each array sorted in descending order\n"
+                         "3. Quit and write arrays and statistics to output file\n"
+                         "Enter your choice: ";
 const int MAX_VALUES = 1000;
-const int DIVISIBLE_BY_FIVE = 5;
-const int DIVISIBLE_BY_SEVEN = 7;
-
-const int PRINT_STATS = 1;
-const int PRINT_SORTED = 2;
-const int QUIT = 3;
-
-const int LABEL_WIDTH = 28;
-const int VALUE_WIDTH = 12;
+const int DIVISOR_FIVE = 5;
+const int DIVISOR_SEVEN = 7;
 const int DECIMAL_PLACES = 2;
+const int EVEN_DIVISOR = 2;
+const int ARRAY_NEIGHBOR_OFFSET = 1;
+const int LABEL_WIDTH = 30;
+const int VALUE_WIDTH = 12;
+const int SEPARATOR_WIDTH = 72;
+const int VALUES_PER_LINE = 4;
+
+enum MenuChoice
+{
+    INVALID_CHOICE = 0,
+    PRINT_STATS = 1,
+    PRINT_SORTED,
+    QUIT
+};
 
 void displayHeader();
 void displayMenu();
 int getMenuChoice();
-void clearFailedInput(const string &message);
-
-void getData(int divisibleByFive[], int &countFive,
-             int divisibleBySeven[], int &countSeven,
-             int otherNumbers[], int &countOther,
-             int &skippedCount);
-
-void storeNumber(int values[], int &count, int number, int &skippedCount);
-
-void processStatsOption(const int divisibleByFive[], int countFive,
-                        const int divisibleBySeven[], int countSeven,
-                        const int otherNumbers[], int countOther);
-
-void processSortedOption(const int divisibleByFive[], int countFive,
-                         const int divisibleBySeven[], int countSeven,
-                         const int otherNumbers[], int countOther);
-
-void processQuitOption(const int divisibleByFive[], int countFive,
-                       const int divisibleBySeven[], int countSeven,
-                       const int otherNumbers[], int countOther,
-                       int skippedCount,
-                       bool &done);
-
-void printArrayReport(const string &title, const int values[], int count);
-void printValues(const int values[], int count);
-void printStatsTable(const int values[], int count);
-
+void clearFailedInput(const char message[]);
+void getData(int divisibleByFive[], int &countFive, int divisibleBySeven[], int &countSeven, int otherNumbers[], int &countOther, int &skippedCount);
+void storeNumber(int number, int divisibleByFive[], int &countFive, int divisibleBySeven[], int &countSeven, int otherNumbers[], int &countOther, int &skippedCount);
+bool addToArray(int values[], int &count, int number);
+void reportFullArray(const char label[], int number);
+void displayAllStats(ostream &out, const int divisibleByFive[], int countFive, const int divisibleBySeven[], int countSeven, const int otherNumbers[], int countOther, int skippedCount);
+void displayOneArrayStats(ostream &out, const char title[], const int values[], int count);
+void displayAllSorted(ostream &out, const int divisibleByFive[], int countFive, const int divisibleBySeven[], int countSeven, const int otherNumbers[], int countOther);
+void displayOneSortedArray(ostream &out, const char title[], const int values[], int count);
+void printValues(ostream &out, const int values[], int count);
+void printStatsTable(ostream &out, const int values[], int count);
+void printSeparator(ostream &out);
+void copyArray(const int source[], int destination[], int count);
+void bubbleSortDescending(int values[], int count);
 int calculateTotal(const int values[], int count);
 double calculateAverage(const int values[], int count);
 double calculateMedian(const int values[], int count);
+void writeOutputFile(const int divisibleByFive[], int countFive, const int divisibleBySeven[], int countSeven, const int otherNumbers[], int countOther, int skippedCount);
 
-void copyArray(const int source[], int destination[], int count);
-void sortDescending(int values[], int count);
-void printSortedValues(const string &title, const int values[], int count);
-
-void writeOutputFile(const int divisibleByFive[], int countFive,
-                     const int divisibleBySeven[], int countSeven,
-                     const int otherNumbers[], int countOther,
-                     int skippedCount);
-
-void writeArrayReport(ofstream &outputFile,
-                      const string &title,
-                      const int values[],
-                      int count);
-
-void writeValues(ofstream &outputFile, const int values[], int count);
-void writeStatsTable(ofstream &outputFile, const int values[], int count);
-
+// Purpose: Runs the menu-driven lab program.
+// Precondition: in_numbers.txt is in the same folder as the executable.
+// Postcondition: User-selected reports are displayed and out_numbers.txt is written on quit.
 int main()
 {
     int divisibleByFive[MAX_VALUES] = {0};
     int divisibleBySeven[MAX_VALUES] = {0};
     int otherNumbers[MAX_VALUES] = {0};
-
     int countFive = 0;
     int countSeven = 0;
     int countOther = 0;
     int skippedCount = 0;
-
-    int choice = 0;
+    int choice = INVALID_CHOICE;
     bool done = false;
 
+    cout << fixed << showpoint << setprecision(DECIMAL_PLACES);
+
     displayHeader();
+    getData(divisibleByFive, countFive, divisibleBySeven, countSeven, otherNumbers, countOther, skippedCount);
 
-    getData(divisibleByFive, countFive,
-            divisibleBySeven, countSeven,
-            otherNumbers, countOther,
-            skippedCount);
-
-    while (done == false)
+    while (!done)
     {
         displayMenu();
         choice = getMenuChoice();
@@ -103,346 +88,301 @@ int main()
         switch (choice)
         {
         case PRINT_STATS:
-            processStatsOption(divisibleByFive, countFive,
-                               divisibleBySeven, countSeven,
-                               otherNumbers, countOther);
+            displayAllStats(cout, divisibleByFive, countFive, divisibleBySeven, countSeven, otherNumbers, countOther, skippedCount);
             break;
-
         case PRINT_SORTED:
-            processSortedOption(divisibleByFive, countFive,
-                                divisibleBySeven, countSeven,
-                                otherNumbers, countOther);
+            displayAllSorted(cout, divisibleByFive, countFive, divisibleBySeven, countSeven, otherNumbers, countOther);
             break;
-
         case QUIT:
-            processQuitOption(divisibleByFive, countFive,
-                              divisibleBySeven, countSeven,
-                              otherNumbers, countOther,
-                              skippedCount,
-                              done);
+            writeOutputFile(divisibleByFive, countFive, divisibleBySeven, countSeven, otherNumbers, countOther, skippedCount);
+            cout << "Program ended.\n";
+            done = true;
             break;
-
         default:
-            cout << "Invalid menu choice." << endl;
+            clearFailedInput(INVALID_CHOICE_MESSAGE);
         }
     }
-
-    return 0;
 }
 
-/*
-Description: This function prints the title and student name.
-Pre-condition: The program has started.
-Post-condition: The header is shown on the screen.
-*/
+// Purpose: Displays the lab title and student name.
+// Precondition: The program has started.
+// Postcondition: The header is printed to the screen.
 void displayHeader()
 {
-    cout << "Lab #1 Refresher Su26" << endl;
-    cout << "Muhammad Yusuf Rehman" << endl;
-    cout << endl;
+    cout << "Lab #1 Refresher Su26\n"
+         << "Muhammad Yusuf Rehman\n";
 }
 
-/*
-Description: This function shows the menu choices.
-Pre-condition: The program is ready for the user to pick an option.
-Post-condition: The menu is printed on the screen.
-*/
+// Purpose: Displays the available menu choices.
+// Precondition: None.
+// Postcondition: The menu is printed to the screen.
 void displayMenu()
 {
-    cout << endl;
-    cout << "Menu" << endl;
-    cout << "1. Print values and statistics" << endl;
-    cout << "2. Print values sorted in descending order" << endl;
-    cout << "3. Quit and write results to output file" << endl;
-    cout << "Enter your choice: ";
+    cout << MENU_TEXT;
 }
 
-/*
-Description: This function gets the menu choice from the user.
-Pre-condition: The user must type something into the keyboard.
-Post-condition: A valid number input is returned.
-*/
+// Purpose: Reads a menu choice.
+// Precondition: User input is available from the keyboard.
+// Postcondition: Returns the entered number or INVALID_CHOICE after failed input.
 int getMenuChoice()
 {
-    int choice = 0;
+    int choice = INVALID_CHOICE;
 
     cin >> choice;
 
-    while (!cin)
+    if (!cin)
     {
-        clearFailedInput("Invalid input. Enter a number: ");
-        cin >> choice;
+        choice = INVALID_CHOICE;
     }
 
     return choice;
 }
 
-/*
-Description: This function clears bad keyboard input.
-Pre-condition: The user typed input that was not valid.
-Post-condition: The input stream is fixed so the user can try again.
-*/
-void clearFailedInput(const string &message)
+// Purpose: Displays an input error message and clears the input stream.
+// Precondition: cin may be failed or may have extra input to discard.
+// Postcondition: cin is ready for the next input attempt.
+void clearFailedInput(const char message[])
 {
-    cout << message;
+    cout << message << '\n';
     cin.clear();
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
-/*
-Description: This function reads numbers from the input file and puts them into arrays.
-Pre-condition: The arrays and counts already exist.
-Post-condition: Numbers are stored in the correct arrays.
-*/
-void getData(int divisibleByFive[], int &countFive,
-             int divisibleBySeven[], int &countSeven,
-             int otherNumbers[], int &countOther,
-             int &skippedCount)
+// Purpose: Reads the input file once and stores each number into the correct array or arrays.
+// Precondition: The input file contains whole numbers only.
+// Postcondition: Values are stored, skipped values are counted, and the file is closed.
+void getData(int divisibleByFive[], int &countFive, int divisibleBySeven[], int &countSeven, int otherNumbers[], int &countOther, int &skippedCount)
 {
     ifstream inputFile;
     int number = 0;
+    int numbersRead = 0;
 
     inputFile.open(INPUT_FILE_NAME);
 
-    if (inputFile)
+    if (!inputFile)
     {
-        while (inputFile >> number)
-        {
-            if (number % DIVISIBLE_BY_FIVE == 0)
-            {
-                storeNumber(divisibleByFive, countFive, number, skippedCount);
-            }
-            else if (number % DIVISIBLE_BY_SEVEN == 0)
-            {
-                storeNumber(divisibleBySeven, countSeven, number, skippedCount);
-            }
-            else
-            {
-                storeNumber(otherNumbers, countOther, number, skippedCount);
-            }
-        }
-
-        inputFile.close();
+        cout << "Error: " << INPUT_FILE_NAME << " could not be opened.\n";
     }
     else
     {
-        cout << "Could not open " << INPUT_FILE_NAME << "." << endl;
-        cout << "Program will continue with empty arrays." << endl;
+        while (inputFile >> number)
+        {
+            storeNumber(number, divisibleByFive, countFive, divisibleBySeven, countSeven, otherNumbers, countOther, skippedCount);
+            numbersRead++;
+        }
+
+        inputFile.close();
+
+        if (numbersRead == 0)
+        {
+            cout << INPUT_FILE_NAME << " has been read. The input file was empty.\n";
+        }
+        else
+        {
+            cout << INPUT_FILE_NAME << " has been read.\n";
+        }
     }
 }
 
-/*
-Description: This function stores one number in an array if there is space.
-Pre-condition: The array and count already exist.
-Post-condition: The number is stored or counted as skipped.
-*/
-void storeNumber(int values[], int &count, int number, int &skippedCount)
+// Purpose: Stores one number in each matching category array.
+// Precondition: Counts match the values currently stored in each array.
+// Postcondition: The number is stored where it belongs, or skipped if an array is full.
+void storeNumber(int number, int divisibleByFive[], int &countFive, int divisibleBySeven[], int &countSeven, int otherNumbers[], int &countOther, int &skippedCount)
 {
+    bool belongsToDivisibleArray = false;
+
+    if (number % DIVISOR_FIVE == 0)
+    {
+        if (!addToArray(divisibleByFive, countFive, number))
+        {
+            skippedCount++;
+            reportFullArray(DIVISIBLE_BY_FIVE_LABEL, number);
+        }
+
+        belongsToDivisibleArray = true;
+    }
+
+    if (number % DIVISOR_SEVEN == 0)
+    {
+        if (!addToArray(divisibleBySeven, countSeven, number))
+        {
+            skippedCount++;
+            reportFullArray(DIVISIBLE_BY_SEVEN_LABEL, number);
+        }
+
+        belongsToDivisibleArray = true;
+    }
+
+    if (!belongsToDivisibleArray)
+    {
+        if (!addToArray(otherNumbers, countOther, number))
+        {
+            skippedCount++;
+            reportFullArray(OTHER_NUMBERS_LABEL, number);
+        }
+    }
+}
+
+// Purpose: Stores one number in one array when space is available.
+// Precondition: count is the current number of stored values.
+// Postcondition: Returns true if the value is stored; otherwise returns false.
+bool addToArray(int values[], int &count, int number)
+{
+    bool wasAdded = false;
+
     if (count < MAX_VALUES)
     {
         values[count] = number;
         count++;
+        wasAdded = true;
     }
-    else
-    {
-        skippedCount++;
-    }
+
+    return wasAdded;
 }
 
-/*
-Description: This function prints all values and statistics.
-Pre-condition: The arrays already have their numbers.
-Post-condition: The values and statistics are printed on the screen.
-*/
-void processStatsOption(const int divisibleByFive[], int countFive,
-                        const int divisibleBySeven[], int countSeven,
-                        const int otherNumbers[], int countOther)
+// Purpose: Reports that one value could not be stored.
+// Precondition: The matching array is full.
+// Postcondition: A warning message is printed to the screen.
+void reportFullArray(const char label[], int number)
 {
-    cout << fixed << showpoint << setprecision(DECIMAL_PLACES);
-
-    printArrayReport("Numbers Divisible by 5", divisibleByFive, countFive);
-    printArrayReport("Numbers Divisible by 7", divisibleBySeven, countSeven);
-    printArrayReport("Other Numbers", otherNumbers, countOther);
+    cout << "Warning: " << label << " array is full. "
+         << number << " was not stored.\n";
 }
 
-/*
-Description: This function prints all values sorted from biggest to smallest.
-Pre-condition: The arrays already have their numbers.
-Post-condition: The sorted values are printed on the screen.
-*/
-void processSortedOption(const int divisibleByFive[], int countFive,
-                         const int divisibleBySeven[], int countSeven,
-                         const int otherNumbers[], int countOther)
+// Purpose: Writes all arrays and statistics to the selected output stream.
+// Precondition: out is open and counts match stored values.
+// Postcondition: A complete report is written to the selected output stream.
+void displayAllStats(ostream &out, const int divisibleByFive[], int countFive, const int divisibleBySeven[], int countSeven, const int otherNumbers[], int countOther, int skippedCount)
 {
-    printSortedValues("Numbers Divisible by 5", divisibleByFive, countFive);
-    printSortedValues("Numbers Divisible by 7", divisibleBySeven, countSeven);
-    printSortedValues("Other Numbers", otherNumbers, countOther);
+    out << "\nValues and Statistics Stored in Arrays\n";
+    printSeparator(out);
+    displayOneArrayStats(out, DIVISIBLE_BY_FIVE_LABEL, divisibleByFive, countFive);
+    displayOneArrayStats(out, DIVISIBLE_BY_SEVEN_LABEL, divisibleBySeven, countSeven);
+    displayOneArrayStats(out, OTHER_NUMBERS_LABEL, otherNumbers, countOther);
+    out << left << setw(LABEL_WIDTH) << "Skipped Values"
+        << right << setw(VALUE_WIDTH) << skippedCount << '\n';
 }
 
-/*
-Description: This function writes the output file and ends the menu loop.
-Pre-condition: The arrays already have their numbers.
-Post-condition: Results are saved to the output file and the program is ready to quit.
-*/
-void processQuitOption(const int divisibleByFive[], int countFive,
-                       const int divisibleBySeven[], int countSeven,
-                       const int otherNumbers[], int countOther,
-                       int skippedCount,
-                       bool &done)
+// Purpose: Writes one array and its statistics.
+// Precondition: out is open and count is not negative.
+// Postcondition: The selected array report is written.
+void displayOneArrayStats(ostream &out, const char title[], const int values[], int count)
 {
-    writeOutputFile(divisibleByFive, countFive,
-                    divisibleBySeven, countSeven,
-                    otherNumbers, countOther,
-                    skippedCount);
-
-    cout << "Program results were written to "
-         << OUTPUT_FILE_NAME << "." << endl;
-    cout << "Program will now quit." << endl;
-
-    done = true;
+    out << '\n' << title << '\n';
+    printSeparator(out);
+    out << left << setw(LABEL_WIDTH) << "Values";
+    printValues(out, values, count);
+    printStatsTable(out, values, count);
 }
 
-/*
-Description: This function prints one report section for one array.
-Pre-condition: The array and its count already exist.
-Post-condition: The values and statistics for that array are printed.
-*/
-void printArrayReport(const string &title, const int values[], int count)
+// Purpose: Displays all arrays sorted in descending order.
+// Precondition: Counts match stored values.
+// Postcondition: Sorted copies are displayed and original arrays are unchanged.
+void displayAllSorted(ostream &out, const int divisibleByFive[], int countFive, const int divisibleBySeven[], int countSeven, const int otherNumbers[], int countOther)
 {
-    cout << endl;
-    cout << title << endl;
-    cout << "Values: ";
-    printValues(values, count);
-
-    if (count > 0)
-    {
-        printStatsTable(values, count);
-    }
-    else
-    {
-        cout << "No values stored in this array." << endl;
-    }
+    out << "\nArrays Sorted in Descending Order\n";
+    printSeparator(out);
+    displayOneSortedArray(out, DIVISIBLE_BY_FIVE_LABEL, divisibleByFive, countFive);
+    displayOneSortedArray(out, DIVISIBLE_BY_SEVEN_LABEL, divisibleBySeven, countSeven);
+    displayOneSortedArray(out, OTHER_NUMBERS_LABEL, otherNumbers, countOther);
 }
 
-/*
-Description: This function prints the numbers in an array.
-Pre-condition: The array and its count already exist.
-Post-condition: The numbers are printed on the screen.
-*/
-void printValues(const int values[], int count)
+// Purpose: Displays one array sorted in descending order.
+// Precondition: count is not negative.
+// Postcondition: A sorted copy is displayed and the original array is unchanged.
+void displayOneSortedArray(ostream &out, const char title[], const int values[], int count)
+{
+    int sortedValues[MAX_VALUES] = {0};
+
+    copyArray(values, sortedValues, count);
+    bubbleSortDescending(sortedValues, count);
+
+    out << left << setw(LABEL_WIDTH) << title;
+    printValues(out, sortedValues, count);
+}
+
+// Purpose: Writes the values stored in one array.
+// Precondition: out is open and count is not negative.
+// Postcondition: Values or a no-values message are written.
+void printValues(ostream &out, const int values[], int count)
 {
     int index = 0;
 
-    if (count > 0)
+    if (count == 0)
+    {
+        out << "No values\n";
+    }
+    else
     {
         while (index < count)
         {
-            cout << values[index] << " ";
+            if (index > 0 && index % VALUES_PER_LINE == 0)
+            {
+                out << '\n'
+                    << left << setw(LABEL_WIDTH) << " ";
+            }
+
+            out << right << setw(VALUE_WIDTH) << values[index];
             index++;
         }
 
-        cout << endl;
+        out << '\n';
+    }
+}
+
+// Purpose: Writes the count, sum, average, and median for one array.
+// Precondition: out is open and count is not negative.
+// Postcondition: A statistics table is written.
+void printStatsTable(ostream &out, const int values[], int count)
+{
+    out << left << setw(LABEL_WIDTH) << "Statistic"
+        << right << setw(VALUE_WIDTH) << "Value" << '\n';
+    out << left << setw(LABEL_WIDTH) << "Count"
+        << right << setw(VALUE_WIDTH) << count << '\n';
+    out << left << setw(LABEL_WIDTH) << "Sum"
+        << right << setw(VALUE_WIDTH) << calculateTotal(values, count) << '\n';
+    out << left << setw(LABEL_WIDTH) << "Average";
+
+    if (count == 0)
+    {
+        out << right << setw(VALUE_WIDTH) << "N/A" << '\n';
     }
     else
     {
-        cout << "None" << endl;
-    }
-}
-
-/*
-Description: This function prints count, sum, average, and median.
-Pre-condition: The array has at least one number.
-Post-condition: The statistics are printed on the screen.
-*/
-void printStatsTable(const int values[], int count)
-{
-    int total = 0;
-    double average = 0.0;
-    double median = 0.0;
-
-    total = calculateTotal(values, count);
-    average = calculateAverage(values, count);
-    median = calculateMedian(values, count);
-
-    cout << left << setw(LABEL_WIDTH) << "Count"
-         << right << setw(VALUE_WIDTH) << count << endl;
-    cout << left << setw(LABEL_WIDTH) << "Sum"
-         << right << setw(VALUE_WIDTH) << total << endl;
-    cout << left << setw(LABEL_WIDTH) << "Average"
-         << right << setw(VALUE_WIDTH) << average << endl;
-    cout << left << setw(LABEL_WIDTH) << "Median"
-         << right << setw(VALUE_WIDTH) << median << endl;
-}
-
-/*
-Description: This function adds all numbers in an array.
-Pre-condition: The array and its count already exist.
-Post-condition: The total is returned.
-*/
-int calculateTotal(const int values[], int count)
-{
-    int index = 0;
-    int total = 0;
-
-    while (index < count)
-    {
-        total = total + values[index];
-        index++;
+        out << right << setw(VALUE_WIDTH) << calculateAverage(values, count) << '\n';
     }
 
-    return total;
-}
+    out << left << setw(LABEL_WIDTH) << "Median";
 
-/*
-Description: This function finds the average of the numbers.
-Pre-condition: The array has at least one number.
-Post-condition: The average is returned.
-*/
-double calculateAverage(const int values[], int count)
-{
-    int total = 0;
-    double average = 0.0;
-
-    total = calculateTotal(values, count);
-    average = static_cast<double>(total) / count;
-
-    return average;
-}
-
-/*
-Description: This function finds the median of the numbers.
-Pre-condition: The array has at least one number.
-Post-condition: The median is returned.
-*/
-double calculateMedian(const int values[], int count)
-{
-    int sortedValues[MAX_VALUES] = {0};
-    int middle = 0;
-    double median = 0.0;
-
-    copyArray(values, sortedValues, count);
-    sortDescending(sortedValues, count);
-
-    middle = count / 2;
-
-    if (count % 2 == 0)
+    if (count == 0)
     {
-        median = (static_cast<double>(sortedValues[middle - 1])
-                  + sortedValues[middle]) / 2;
+        out << right << setw(VALUE_WIDTH) << "N/A" << '\n';
     }
     else
     {
-        median = sortedValues[middle];
+        out << right << setw(VALUE_WIDTH) << calculateMedian(values, count) << '\n';
     }
-
-    return median;
 }
 
-/*
-Description: This function copies one array into another array.
-Pre-condition: The source and destination arrays already exist.
-Post-condition: The destination array has the same values as the source array.
-*/
+// Purpose: Writes a separator line.
+// Precondition: out is open.
+// Postcondition: A separator line is written.
+void printSeparator(ostream &out)
+{
+    int count = 0;
+
+    while (count < SEPARATOR_WIDTH)
+    {
+        out << '-';
+        count++;
+    }
+
+    out << '\n';
+}
+
+// Purpose: Copies stored values from one array into another.
+// Precondition: destination has room for count values.
+// Postcondition: destination contains the copied values.
 void copyArray(const int source[], int destination[], int count)
 {
     int index = 0;
@@ -454,28 +394,26 @@ void copyArray(const int source[], int destination[], int count)
     }
 }
 
-/*
-Description: This function sorts an array from biggest to smallest.
-Pre-condition: The array and its count already exist.
-Post-condition: The array is sorted in descending order.
-*/
-void sortDescending(int values[], int count)
+// Purpose: Sorts one array in descending order.
+// Precondition: count is not negative.
+// Postcondition: The provided array is sorted in descending order.
+void bubbleSortDescending(int values[], int count)
 {
     int pass = 0;
     int index = 0;
     int temp = 0;
 
-    while (pass < count - 1)
+    while (pass < count - ARRAY_NEIGHBOR_OFFSET)
     {
         index = 0;
 
-        while (index < count - pass - 1)
+        while (index < count - ARRAY_NEIGHBOR_OFFSET - pass)
         {
-            if (values[index] < values[index + 1])
+            if (values[index] < values[index + ARRAY_NEIGHBOR_OFFSET])
             {
                 temp = values[index];
-                values[index] = values[index + 1];
-                values[index + 1] = temp;
+                values[index] = values[index + ARRAY_NEIGHBOR_OFFSET];
+                values[index + ARRAY_NEIGHBOR_OFFSET] = temp;
             }
 
             index++;
@@ -485,227 +423,252 @@ void sortDescending(int values[], int count)
     }
 }
 
-/*
-Description: This function prints a sorted copy of an array.
-Pre-condition: The array and its count already exist.
-Post-condition: The sorted values are printed without changing the original array.
-*/
-void printSortedValues(const string &title, const int values[], int count)
+// Purpose: Calculates the sum of one array.
+// Precondition: count is not negative.
+// Postcondition: Returns the sum of the stored values.
+int calculateTotal(const int values[], int count)
 {
-    int sortedValues[MAX_VALUES] = {0};
+    int index = 0;
+    int total = 0;
 
-    copyArray(values, sortedValues, count);
-    sortDescending(sortedValues, count);
+    while (index < count)
+    {
+        total += values[index];
+        index++;
+    }
 
-    cout << endl;
-    cout << title << " Sorted Descending" << endl;
-    cout << "Values: ";
-    printValues(sortedValues, count);
+    return total;
 }
 
-/*
-Description: This function writes all results to the output file.
-Pre-condition: The arrays and counts already exist.
-Post-condition: The output file has the final report.
-*/
-void writeOutputFile(const int divisibleByFive[], int countFive,
-                     const int divisibleBySeven[], int countSeven,
-                     const int otherNumbers[], int countOther,
-                     int skippedCount)
+// Purpose: Calculates the average of one array.
+// Precondition: count is greater than zero.
+// Postcondition: Returns the average of the stored values.
+double calculateAverage(const int values[], int count)
+{
+    return static_cast<double>(calculateTotal(values, count)) / count;
+}
+
+// Purpose: Calculates the median of one array.
+// Precondition: count is greater than zero.
+// Postcondition: Returns the median of the stored values.
+double calculateMedian(const int values[], int count)
+{
+    int sortedValues[MAX_VALUES] = {0};
+    int middle = 0;
+    double median = 0.0;
+
+    copyArray(values, sortedValues, count);
+    bubbleSortDescending(sortedValues, count);
+
+    middle = count / EVEN_DIVISOR;
+
+    if (count % EVEN_DIVISOR == 0)
+    {
+        median = sortedValues[middle - ARRAY_NEIGHBOR_OFFSET];
+        median += sortedValues[middle];
+        median = median / EVEN_DIVISOR;
+    }
+    else
+    {
+        median = sortedValues[middle];
+    }
+
+    return median;
+}
+
+// Purpose: Writes the final report to the output file.
+// Precondition: Counts match the values stored in each array.
+// Postcondition: out_numbers.txt contains the final report if the file opens successfully.
+void writeOutputFile(const int divisibleByFive[], int countFive, const int divisibleBySeven[], int countSeven, const int otherNumbers[], int countOther, int skippedCount)
 {
     ofstream outputFile;
 
     outputFile.open(OUTPUT_FILE_NAME);
 
-    if (outputFile)
+    if (!outputFile)
+    {
+        cout << "Error: " << OUTPUT_FILE_NAME << " could not be opened.\n";
+    }
+    else
     {
         outputFile << fixed << showpoint << setprecision(DECIMAL_PLACES);
-
-        outputFile << "Lab #1 Refresher Su26" << endl;
-        outputFile << "Muhammad Yusuf Rehman" << endl;
-        outputFile << endl;
-
-        writeArrayReport(outputFile, "Numbers Divisible by 5",
-                         divisibleByFive, countFive);
-        writeArrayReport(outputFile, "Numbers Divisible by 7",
-                         divisibleBySeven, countSeven);
-        writeArrayReport(outputFile, "Other Numbers",
-                         otherNumbers, countOther);
-
-        outputFile << endl;
-        outputFile << left << setw(LABEL_WIDTH)
-                   << "Skipped Values"
-                   << right << setw(VALUE_WIDTH)
-                   << skippedCount << endl;
-
+        outputFile << "Lab #1 Refresher Su26\n"
+                   << "Muhammad Yusuf Rehman\n";
+        displayAllStats(outputFile, divisibleByFive, countFive, divisibleBySeven, countSeven, otherNumbers, countOther, skippedCount);
         outputFile.close();
-    }
-    else
-    {
-        cout << "Could not open " << OUTPUT_FILE_NAME << "." << endl;
+        cout << "Arrays and statistics were written to " << OUTPUT_FILE_NAME << ".\n";
     }
 }
 
 /*
-Description: This function writes one report section to the output file.
-Pre-condition: The output file is open and the array exists.
-Post-condition: One section is written to the output file.
-*/
-void writeArrayReport(ofstream &outputFile,
-                      const string &title,
-                      const int values[],
-                      int count)
-{
-    outputFile << endl;
-    outputFile << title << endl;
-    outputFile << "Values: ";
-    writeValues(outputFile, values, count);
+Test Run 1 - Mixed values, invalid menu input, sorted output, and output file
+Input file values:
+5 7 10 14 15 21 22 25 28 30 35 42 43 49 50 55 60 70 71 0 -5 -7 -35
 
-    if (count > 0)
-    {
-        writeStatsTable(outputFile, values, count);
-    }
-    else
-    {
-        outputFile << "No values stored in this array." << endl;
-    }
-}
-
-/*
-Description: This function writes the numbers in an array to the output file.
-Pre-condition: The output file is open and the array exists.
-Post-condition: The numbers are written to the output file.
-*/
-void writeValues(ofstream &outputFile, const int values[], int count)
-{
-    int index = 0;
-
-    if (count > 0)
-    {
-        while (index < count)
-        {
-            outputFile << values[index] << " ";
-            index++;
-        }
-
-        outputFile << endl;
-    }
-    else
-    {
-        outputFile << "None" << endl;
-    }
-}
-
-/*
-Description: This function writes count, sum, average, and median to the output file.
-Pre-condition: The output file is open and the array has at least one number.
-Post-condition: The statistics are written to the output file.
-*/
-void writeStatsTable(ofstream &outputFile, const int values[], int count)
-{
-    int total = 0;
-    double average = 0.0;
-    double median = 0.0;
-
-    total = calculateTotal(values, count);
-    average = calculateAverage(values, count);
-    median = calculateMedian(values, count);
-
-    outputFile << left << setw(LABEL_WIDTH) << "Count"
-               << right << setw(VALUE_WIDTH) << count << endl;
-    outputFile << left << setw(LABEL_WIDTH) << "Sum"
-               << right << setw(VALUE_WIDTH) << total << endl;
-    outputFile << left << setw(LABEL_WIDTH) << "Average"
-               << right << setw(VALUE_WIDTH) << average << endl;
-    outputFile << left << setw(LABEL_WIDTH) << "Median"
-               << right << setw(VALUE_WIDTH) << median << endl;
-}
-
-/*
-
-in_numbers.txt:
-5 7 10 14 15 21 22 25 28 30 35 42 43 49 50 55 60 70 71
-
-Sample Test Run:
 Lab #1 Refresher Su26
 Muhammad Yusuf Rehman
+in_numbers.txt has been read.
 
 
 Menu
-1. Print values and statistics
-2. Print values sorted in descending order
-3. Quit and write results to output file
-Enter your choice: 1
+1. Print values in each array with average, median, and sum
+2. Print values in each array sorted in descending order
+3. Quit and write arrays and statistics to output file
+Enter your choice: Invalid menu choice.
+
+
+Menu
+1. Print values in each array with average, median, and sum
+2. Print values in each array sorted in descending order
+3. Quit and write arrays and statistics to output file
+Enter your choice: Invalid menu choice.
+
+
+Menu
+1. Print values in each array with average, median, and sum
+2. Print values in each array sorted in descending order
+3. Quit and write arrays and statistics to output file
+Enter your choice:
+Values and Statistics Stored in Arrays
+------------------------------------------------------------------------
 
 Numbers Divisible by 5
-Values: 5 10 15 25 30 35 50 55 60 70 
-Count                                 10
-Sum                                  355
-Average                            35.50
-Median                             32.50
+------------------------------------------------------------------------
+Values                                   5          10          15          25
+                                        30          35          50          55
+                                        60          70           0          -5
+                                       -35
+Statistic                            Value
+Count                                   13
+Sum                                    315
+Average                              24.23
+Median                               25.00
 
 Numbers Divisible by 7
-Values: 7 14 21 28 42 49 
-Count                                  6
-Sum                                  161
-Average                            26.83
-Median                             24.50
+------------------------------------------------------------------------
+Values                                   7          14          21          28
+                                        35          42          49          70
+                                         0          -7         -35
+Statistic                            Value
+Count                                   11
+Sum                                    224
+Average                              20.36
+Median                               21.00
 
 Other Numbers
-Values: 22 43 71 
-Count                                  3
-Sum                                  136
-Average                            45.33
-Median                             43.00
+------------------------------------------------------------------------
+Values                                  22          43          71
+Statistic                            Value
+Count                                    3
+Sum                                    136
+Average                              45.33
+Median                               43.00
+Skipped Values                           0
+
 
 Menu
-1. Print values and statistics
-2. Print values sorted in descending order
-3. Quit and write results to output file
-Enter your choice: 2
+1. Print values in each array with average, median, and sum
+2. Print values in each array sorted in descending order
+3. Quit and write arrays and statistics to output file
+Enter your choice:
+Arrays Sorted in Descending Order
+------------------------------------------------------------------------
+Numbers Divisible by 5                  70          60          55          50
+                                        35          30          25          15
+                                        10           5           0          -5
+                                       -35
+Numbers Divisible by 7                  70          49          42          35
+                                        28          21          14           7
+                                         0          -7         -35
+Other Numbers                           71          43          22
 
-Numbers Divisible by 5 Sorted Descending
-Values: 70 60 55 50 35 30 25 15 10 5 
-
-Numbers Divisible by 7 Sorted Descending
-Values: 49 42 28 21 14 7 
-
-Other Numbers Sorted Descending
-Values: 71 43 22 
 
 Menu
-1. Print values and statistics
-2. Print values sorted in descending order
-3. Quit and write results to output file
-Enter your choice: 3
-Program results were written to out_numbers.txt.
-Program will now quit.
+1. Print values in each array with average, median, and sum
+2. Print values in each array sorted in descending order
+3. Quit and write arrays and statistics to output file
+Enter your choice: Arrays and statistics were written to out_numbers.txt.
+Program ended.
 
-out_numbers.txt:
-Lab #1 Refresher Su26
-Muhammad Yusuf Rehman
+Test Run 2 - Empty input file
+in_numbers.txt has been read. The input file was empty.
 
+Values and Statistics Stored in Arrays
+------------------------------------------------------------------------
 
 Numbers Divisible by 5
-Values: 5 10 15 25 30 35 50 55 60 70 
-Count                                 10
-Sum                                  355
-Average                            35.50
-Median                             32.50
+------------------------------------------------------------------------
+Values                        No values
+Statistic                            Value
+Count                                    0
+Sum                                      0
+Average                               N/A
+Median                                N/A
 
 Numbers Divisible by 7
-Values: 7 14 21 28 42 49 
-Count                                  6
-Sum                                  161
-Average                            26.83
-Median                             24.50
+------------------------------------------------------------------------
+Values                        No values
+Statistic                            Value
+Count                                    0
+Sum                                      0
+Average                               N/A
+Median                                N/A
 
 Other Numbers
-Values: 22 43 71 
-Count                                  3
-Sum                                  136
-Average                            45.33
-Median                             43.00
+------------------------------------------------------------------------
+Values                        No values
+Statistic                            Value
+Count                                    0
+Sum                                      0
+Average                               N/A
+Median                                N/A
+Skipped Values                           0
 
-Skipped Values                         0
+Test Run 3 - Only numbers divisible by neither 5 nor 7
+Input file values:
+1 2 3 4 8 11 13 16 22 23
+
+Other Numbers
+------------------------------------------------------------------------
+Values                                   1           2           3           4
+                                         8          11          13          16
+                                        22          23
+Statistic                            Value
+Count                                   10
+Sum                                    103
+Average                              10.30
+Median                                9.50
+
+Test Run 4 - Only numbers divisible by 5
+Input file values:
+5 10 -15 20
+
+Numbers Divisible by 5
+------------------------------------------------------------------------
+Values                                   5          10         -15          20
+Statistic                            Value
+Count                                    4
+Sum                                     20
+Average                               5.00
+Median                                7.50
+
+Test Run 5 - Only numbers divisible by 7
+Input file values:
+7 14 -21 28
+
+Numbers Divisible by 7
+------------------------------------------------------------------------
+Values                                   7          14         -21          28
+Statistic                            Value
+Count                                    4
+Sum                                     28
+Average                               7.00
+Median                               10.50
+
+Test Run 6 - More values than one array can store
+Input file values:
+1001 copies of 5
+
+Warning: Numbers Divisible by 5 array is full. 5 was not stored.
+Skipped Values                           1
 */
