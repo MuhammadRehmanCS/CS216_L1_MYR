@@ -501,10 +501,11 @@ void writeOutputFile(const int divisibleByFive[], int countFive, const int divis
 }
 
 /*
-Test Run 1 - Mixed values, invalid menu input, sorted output, and output file
-Input file values:
-5 7 10 14 15 21 22 25 28 30 35 42 43 49 50 55 60 70 71 0 -5 -7 -35
+in_numbers.txt:
+5 7 10 14 15 21 22 25 28 30 35 42
+43 49 50 55 60 70 71 0 -5 -7 -35
 
+Sample Test Run:
 Lab #1 Refresher Su26
 Muhammad Yusuf Rehman
 in_numbers.txt has been read.
@@ -514,21 +515,24 @@ Menu
 1. Print values in each array with average, median, and sum
 2. Print values in each array sorted in descending order
 3. Quit and write arrays and statistics to output file
-Enter your choice: Invalid menu choice.
+Enter your choice: x
+Invalid menu choice.
 
 
 Menu
 1. Print values in each array with average, median, and sum
 2. Print values in each array sorted in descending order
 3. Quit and write arrays and statistics to output file
-Enter your choice: Invalid menu choice.
+Enter your choice: 9
+Invalid menu choice.
 
 
 Menu
 1. Print values in each array with average, median, and sum
 2. Print values in each array sorted in descending order
 3. Quit and write arrays and statistics to output file
-Enter your choice:
+Enter your choice: 1
+
 Values and Statistics Stored in Arrays
 ------------------------------------------------------------------------
 
@@ -570,7 +574,8 @@ Menu
 1. Print values in each array with average, median, and sum
 2. Print values in each array sorted in descending order
 3. Quit and write arrays and statistics to output file
-Enter your choice:
+Enter your choice: 2
+
 Arrays Sorted in Descending Order
 ------------------------------------------------------------------------
 Numbers Divisible by 5                  70          60          55          50
@@ -587,88 +592,48 @@ Menu
 1. Print values in each array with average, median, and sum
 2. Print values in each array sorted in descending order
 3. Quit and write arrays and statistics to output file
-Enter your choice: Arrays and statistics were written to out_numbers.txt.
+Enter your choice: 3
+Arrays and statistics were written to out_numbers.txt.
 Program ended.
 
-Test Run 2 - Empty input file
-in_numbers.txt has been read. The input file was empty.
+out_numbers.txt:
+Lab #1 Refresher Su26
+Muhammad Yusuf Rehman
 
 Values and Statistics Stored in Arrays
 ------------------------------------------------------------------------
 
 Numbers Divisible by 5
 ------------------------------------------------------------------------
-Values                        No values
+Values                                   5          10          15          25
+                                        30          35          50          55
+                                        60          70           0          -5
+                                       -35
 Statistic                            Value
-Count                                    0
-Sum                                      0
-Average                               N/A
-Median                                N/A
+Count                                   13
+Sum                                    315
+Average                              24.23
+Median                               25.00
 
 Numbers Divisible by 7
 ------------------------------------------------------------------------
-Values                        No values
+Values                                   7          14          21          28
+                                        35          42          49          70
+                                         0          -7         -35
 Statistic                            Value
-Count                                    0
-Sum                                      0
-Average                               N/A
-Median                                N/A
+Count                                   11
+Sum                                    224
+Average                              20.36
+Median                               21.00
 
 Other Numbers
 ------------------------------------------------------------------------
-Values                        No values
+Values                                  22          43          71
 Statistic                            Value
-Count                                    0
-Sum                                      0
-Average                               N/A
-Median                                N/A
+Count                                    3
+Sum                                    136
+Average                              45.33
+Median                               43.00
 Skipped Values                           0
 
-Test Run 3 - Only numbers divisible by neither 5 nor 7
-Input file values:
-1 2 3 4 8 11 13 16 22 23
-
-Other Numbers
-------------------------------------------------------------------------
-Values                                   1           2           3           4
-                                         8          11          13          16
-                                        22          23
-Statistic                            Value
-Count                                   10
-Sum                                    103
-Average                              10.30
-Median                                9.50
-
-Test Run 4 - Only numbers divisible by 5
-Input file values:
-5 10 -15 20
-
-Numbers Divisible by 5
-------------------------------------------------------------------------
-Values                                   5          10         -15          20
-Statistic                            Value
-Count                                    4
-Sum                                     20
-Average                               5.00
-Median                                7.50
-
-Test Run 5 - Only numbers divisible by 7
-Input file values:
-7 14 -21 28
-
-Numbers Divisible by 7
-------------------------------------------------------------------------
-Values                                   7          14         -21          28
-Statistic                            Value
-Count                                    4
-Sum                                     28
-Average                               7.00
-Median                               10.50
-
-Test Run 6 - More values than one array can store
-Input file values:
-1001 copies of 5
-
-Warning: Numbers Divisible by 5 array is full. 5 was not stored.
-Skipped Values                           1
 */
